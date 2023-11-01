@@ -58,4 +58,24 @@ class Query(graphene.ObjectType):
     def resolve_all_answers(root, info, id):
         return Answer.objects.filter(question=id)
 
-schema = graphene.Schema(query=Query)
+class CategoryMutation(graphene.Mutation):
+
+    class Arguments:
+        name = graphene.String(required=True)
+
+    # connect with model
+    category = graphene.Field(CategoryType)
+
+    #build custom function , we fetch name from frontend and save it
+    @classmethod
+    def mutate(cls, root, info, name):
+        category = Category(name=name)
+        category.save()
+        return CategoryMutation(category=category)
+
+
+class Mutation(graphene.ObjectType):
+    
+    update_category = CategoryMutation.Field()
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
